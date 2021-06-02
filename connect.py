@@ -1,23 +1,10 @@
 import mysql.connector
-import sys
-import boto3
-import os
+from sqlalchemy import create_engine
+import pandas as pd
+import numpy as np
 
-ENDPOINT="parlay-scraped-1.cye7mkifplef.us-east-2.rds.amazonaws.com"
-PORT="3306"
-USR="admin"
-REGION="us-east-2c"
-DBNAME="parlay-scraped-1"
-os.environ['LIBMYSQL_ENABLE_CLEARTEXT_PLUGIN'] = '1'
+engine = create_engine('mysql+mysqlconnector://admin:c12888d88c@parlay-scraped-1.cye7mkifplef.us-east-2.rds.amazonaws.com:3306/Test', echo=False)
 
-#gets the credentials from .aws/credentials
-session = boto3.Session(profile_name='default')
-client = session.client('rds')
+df = pd.DataFrame(np.random.randint(0,10,size=(1, 4)), columns=list('ABCD'))
+df.to_sql(name='random', con=engine, if_exists = 'append', index=False)
 
-token = client.generate_db_auth_token(DBHostname=ENDPOINT, Port=PORT, DBUsername=USR, Region=REGION)
-
-try:
-    conn =  mysql.connector.connect(host=ENDPOINT, user=USR, passwd=token, port=PORT, database=DBNAME)
-    print("Database connection success.")
-except Exception as e:
-    print("Database connection failed due to {}".format(e))       
